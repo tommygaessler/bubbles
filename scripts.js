@@ -10,9 +10,12 @@ let role = 1
 
 zmClient.init('US-en', 'CDN')
 
-getSignature()
+start()
 
-function getSignature() {
+// solve for if user closes app
+// solve gallery view order for if user leaves
+
+function start() {
 
   fetch(signatureEndpoint, {
     method: 'POST',
@@ -39,10 +42,15 @@ function joinSession(signature) {
 
     if(zmClient.getCurrentUserInfo().isHost) {
 
+      document.getElementById('loadingText').style.display = 'none'
+      document.getElementById('waitingText').style.display = 'block'
+
     } else {
       // document.getElementById('videoButton').disabled = false;
       document.getElementById('videoButton').style.display = 'block'
       document.getElementById('leaveButton').style.display = 'block'
+
+      document.getElementById('loading').style.display = 'none'
     }
 
     console.log(zmClient.getCurrentUserInfo())
@@ -70,10 +78,14 @@ function startVideo() {
 }
 
 function leave() {
-  zmStream.stopRenderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId).then(() => {})
-  zmClient.leave()
+  document.getElementById('self-view-canvas').style.visibility = 'hidden'
   document.getElementById('leaveButton').style.display = 'none'
-  document.getElementById('videoButton').style.display = 'block'
+  document.getElementById('thanks').style.display = 'flex'
+  zmStream.stopRenderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId).then(() => {
+    zmStream.stopVideo().then(() => {
+      zmClient.leave()
+    })
+  })
 }
 
 zmClient.on('peer-video-state-change', (payload) => {
@@ -90,11 +102,16 @@ zmClient.on('peer-video-state-change', (payload) => {
 
         if(zmClient.getCurrentUserInfo().isHost) {
           renderVideos(payload.userId)
+          document.getElementById('waitingText').style.display = 'none'
+          document.getElementById('loading').style.display = 'none'
         }
 
       } else if(payload.action === 'Stop') {
+        console.log('stopped video, remove user')
         zmStream.stopRenderVideo(document.querySelector('#zoom-canvas'), payload.userId).then(() => {
 
+        }).catch((error) => {
+          console.log(error)
         })
       }
     }
@@ -167,7 +184,16 @@ zmClient.on('user-removed', (payload) => {
   if(payload.length) {
     console.log(payload);
     document.getElementById(`bubble-${payload[0].userId}`).remove()
-    zmStream.stopRenderVideo(document.getElementById(`bubble-${payload[0].userId}`), payload[0].userId)
+    // document.getElementById(`bubble-${payload[0].userId}`).remove()
+    // zmStream.stopRenderVideo(document.getElementById('#zoom-canvas'), payload[0].userId).then(() => {
+    //
+    // }).catch((error) => {
+    //   console.log(error)
+    // })
+    if(zmClient.getAllUser().length < 2) {
+      document.getElementById('waitingText').style.display = 'block'
+      document.getElementById('loading').style.display = 'flex'
+    }
   }
 })
 
@@ -181,7 +207,10 @@ zmClient.off('user-added', (payload) => {
 })
 
 zmClient.off('user-removed', (payload) => {
-
+  // zmStream.stopRenderVideo(document.querySelector('#zoom-canvas'), payload[0].userId).then(() => {
+  //
+  //
+  // })
 })
 
 function createBubble(userId, xCord, yCord) {
@@ -213,7 +242,8 @@ function createBubble(userId, xCord, yCord) {
     dirX = 1,
     dirY = 1;
   const speed = 2;
-  const pallete = ["#ff8800", "#e124ff", "#6a19ff", "#ff2188"];
+
+  const pallete = ["#7C33F3", "#F700BA", "#FF287F", "#FF8152", "#FFC246", "#F9F871"];
   let dvd = document.getElementById(`bubble-${userId}`);
   let prevColorChoiceIndex = 0;
   const dvdWidth = dvd.clientWidth;
@@ -234,14 +264,14 @@ function createBubble(userId, xCord, yCord) {
 
     if (y + dvdHeight >= screenHeight || y < 0) {
       dirY *= -1;
-      // dvd.style.borderColor = getNewRandomColor();
-      dvd.style.backgroundColor = getNewRandomColor();
+      dvd.style.borderColor = getNewRandomColor();
+      // dvd.style.backgroundColor = getNewRandomColor();
     }
     if (x + dvdWidth >= screenWidth || x < 0) {
       dirX *= -1;
 
-      // dvd.style.borderColor = getNewRandomColor();
-      dvd.style.backgroundColor = getNewRandomColor();
+      dvd.style.borderColor = getNewRandomColor();
+      // dvd.style.backgroundColor = getNewRandomColor();
     }
     x += dirX * speed;
     y += dirY * speed;

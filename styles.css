@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 html, body {
@@ -13,6 +14,8 @@ body {
   overflow: hidden;
   box-sizing: border-box;
   position: relative;
+  background-color: #000000;
+  color: #ffffff;
 }
 
 .circle {
@@ -22,6 +25,10 @@ body {
   left: 0;
   height: 200px;
   width: 200px;
+  /* box-shadow: inset 0px 0px 0px 5px #7C33F3; */
+  box-sizing: border-box;
+  border: 10px solid #7C33F3;
+  /* padding: 5px; */
 }
 
 #videoButton {
@@ -32,10 +39,23 @@ body {
   top: 0;
   margin: auto;
   text-align: center;
-  width: 100px;
-  height: 30px;
+  width: 150px;
+  height: 40px;
   cursor: pointer;
   display: none;
+  background-color: #2D8CFF;
+  color: #ffffff;
+  text-decoration: none;
+  border: none;
+  border-radius: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+#videoButton:hover {
+  background-color: #2681F2;
 }
 
 #leaveButton {
@@ -44,13 +64,23 @@ body {
   left: 0;
   right: 0;
   margin: auto;
-  width: 100px;
-  height: 30px;
+  width: 150px;
+  height: 40px;
+  background-color: #FF287F;
+  color: #ffffff;
+  border-radius: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  text-decoration: none;
+  border: none;
+  padding-right: 20px;
   display: none;
 }
 
 #leaveButton:hover {
   cursor: pointer;
+  background-color: #F700BA;
 }
 
 #cropped-canvas {
@@ -98,4 +128,118 @@ body {
   position: absolute;
   bottom: 0;
   left: 0;
+}
+
+#thanks {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+  text-align: center;
+}
+
+#thanks h2 {
+  margin-top: 0;
+}
+
+.learn-more {
+  background-color: #2D8CFF;
+  color: #ffffff;
+  text-decoration: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: inline-block;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.learn-more:hover {
+  background-color: #2681F2;
+}
+
+.rejoin {
+  color: #ffffff;
+}
+
+/* loading from https://bbbootstrap.com/snippets/bouncy-balls-loader-animation-effect-59586268 */
+#loading {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column-reverse;
+}
+
+#waitingText {
+   display: none;
+}
+
+#loading h2 {
+  text-align: center;
+}
+
+ul {
+  display: flex;
+  padding: 0;
+}
+
+ul li {
+  list-style: none;
+  height: 20px;
+  width: 20px;
+  background-color: red;
+  margin: 0 4px;
+  border-radius: 50%;
+  animation: bounce 1s linear infinite;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-40px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+ul li:nth-child(1) {
+  animation-delay: 0.2s;
+  background-color: #7C33F3;
+}
+
+ul li:nth-child(2) {
+  animation-delay: 0.6s;
+  background-color: #F700BA;
+}
+
+ul li:nth-child(3) {
+  animation-delay: 0.1s;
+  background-color: #FF287F;
+}
+
+ul li:nth-child(4) {
+  animation-delay: 0.8s;
+  background-color: #FF8152;
+}
+
+ul li:nth-child(5) {
+  animation-delay: 0.5s;
+  background-color: #FFC246;
+}
+
+ul li:nth-child(6) {
+  animation-delay: 0.1s;
+  background-color: #F9F871;
 }
