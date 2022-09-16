@@ -246,8 +246,8 @@ function createBubble(userId, xCord, yCord) {
   const pallete = ["#7C33F3", "#F700BA", "#FF287F", "#FF8152", "#FFC246", "#F9F871"];
   let dvd = document.getElementById(`bubble-${userId}`);
   let prevColorChoiceIndex = 0;
-  const dvdWidth = dvd.clientWidth;
-  const dvdHeight = dvd.clientHeight;
+  const dvdWidth = dvd.clientWidth+20;
+  const dvdHeight = dvd.clientHeight+20;
 
   function getNewRandomColor() {
     const currentPallete = [...pallete]
