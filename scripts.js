@@ -61,7 +61,23 @@ function joinSession(signature) {
 }
 
 function startVideo() {
-  if(!!window.chrome && (typeof SharedArrayBuffer === 'function')) {
+
+
+  // firefox 105 (testing for offscreen canvas) might also need this for android.
+  if(!(typeof SharedArrayBuffer === 'function') && (typeof OffscreenCanvas === 'function')) {
+    zmStream.startVideo({ videoElement: document.querySelector('#self-view-video') }).then(() => {
+      console.log('hello')
+      zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
+        document.getElementById('videoButton').style.display = 'none'
+        document.getElementById('self-view-video').style.visibility = 'hidden'
+      })
+      // document.getElementById('videoButton').style.display = 'none'
+      // document.getElementById('self-view-canvas').style.visibility = 'hidden'
+    }).catch((error) => {
+      console.log(error)
+    })
+  } else {
+    // desktop edge, chrome, safari
     zmStream.startVideo({ mirrored: true }).then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
@@ -70,15 +86,22 @@ function startVideo() {
     }).catch((error) => {
       console.log(error)
     })
-  } else {
-    zmStream.startVideo({ videoElement: document.querySelector('#self-view-video'), mirrored: true }).then(() => {
-      console.log('hello')
-      document.getElementById('videoButton').style.display = 'none'
-      document.getElementById('self-view-canvas').style.visibility = 'hidden'
-    }).catch((error) => {
-      console.log(error)
-    })
   }
+
+  // if(!!window.chrome && (typeof SharedArrayBuffer === 'function')) {
+    // zmStream.startVideo({ mirrored: true }).then(() => {
+    //   zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
+    //     document.getElementById('videoButton').style.display = 'none'
+    //     document.getElementById('self-view-video').style.visibility = 'hidden'
+    //   })
+    // }).catch((error) => {
+    //   console.log(error)
+    // })
+  // } else {
+
+  // firefox
+
+  // }
 }
 
 function leave() {
@@ -151,6 +174,7 @@ function renderVideos(userId) {
     // 5 5
     console.log('column 5')
     zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1420, yCord5, 2).then(() => {
+      // createBubble(userId, -1420, -(800-yCord5))
       createBubble(userId, -1420, -(800-yCord5))
       yCord5+=200
     })
@@ -158,28 +182,32 @@ function renderVideos(userId) {
     // 4 5
     console.log('column 4')
     zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1065, yCord4, 2).then(() => {
-      createBubble(userId, -1065, -(800-yCord4))
+      // createBubble(userId, -1065, -(800-yCord4))
+      createBubble(userId, -1498, -(800-yCord4))
       yCord4+=200
     })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 10) {
     // 3 5
     console.log('column 3')
     zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 710, yCord3, 2).then(() => {
-      createBubble(userId, -710, -(800-yCord3))
+      // createBubble(userId, -710, -(800-yCord3))
+      createBubble(userId, -788, -(800-yCord3))
       yCord3+=200
     })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 5) {
     // 2 5
     console.log('column 2')
     zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 355, yCord2, 2).then(() => {
-      createBubble(userId, -355, -(800-yCord2))
+      // createBubble(userId, -355, -(800-yCord2))
+      createBubble(userId, -433, -(800-yCord2))
       yCord2+=200
     })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length >= 1) {
     // 1 5
     console.log('column 1')
     zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, xCord, yCord, 2).then(() => {
-      createBubble(userId, -100, -(800-yCord))
+      // createBubble(userId, -100, -(800-yCord))
+      createBubble(userId, -78, -(800-yCord))
       yCord+=200
     })
   }
