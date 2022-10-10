@@ -3,7 +3,7 @@ const VideoSDK = window.WebVideoSDK.default
 let zmClient = VideoSDK.createClient()
 
 let signatureEndpoint = 'https://videosdk-sample-signature.herokuapp.com'
-let sessionName = 'bubbles'
+let sessionName = 'bubbles2'
 let sessionPasscode = 'test123'
 let userName = 'Participant' + Math.floor(Math.random() * 100)
 let role = 1
@@ -61,16 +61,20 @@ function joinSession(signature) {
 }
 
 function startVideo() {
-
-  if(!!window.chrome && !(typeof SharedArrayBuffer === 'function')) {
-    zmStream.startVideo({ videoElement: document.querySelector('#self-view-video'), mirrored: true }).then(() => {
-
-    })
-  } else {
+  if(!!window.chrome && (typeof SharedArrayBuffer === 'function')) {
     zmStream.startVideo({ mirrored: true }).then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
+        document.getElementById('self-view-video').style.visibility = 'hidden'
       })
+    }).catch((error) => {
+      console.log(error)
+    })
+  } else {
+    zmStream.startVideo({ videoElement: document.querySelector('#self-view-video'), mirrored: true }).then(() => {
+      console.log('hello')
+      document.getElementById('videoButton').style.display = 'none'
+      document.getElementById('self-view-canvas').style.visibility = 'hidden'
     }).catch((error) => {
       console.log(error)
     })
@@ -79,12 +83,14 @@ function startVideo() {
 
 function leave() {
   document.getElementById('self-view-canvas').style.visibility = 'hidden'
+  document.getElementById('self-view-video').style.visibility = 'hidden'
   document.getElementById('leaveButton').style.display = 'none'
   document.getElementById('thanks').style.display = 'flex'
   zmStream.stopRenderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId).then(() => {
-    zmStream.stopVideo().then(() => {
-      zmClient.leave()
-    })
+  })
+
+  zmStream.stopVideo().then(() => {
+    zmClient.leave()
   })
 }
 
@@ -109,7 +115,11 @@ zmClient.on('peer-video-state-change', (payload) => {
       } else if(payload.action === 'Stop') {
         console.log('stopped video, remove user')
         zmStream.stopRenderVideo(document.querySelector('#zoom-canvas'), payload.userId).then(() => {
-
+          document.getElementById(`bubble-${payload.userId}`).remove()
+          if(zmClient.getAllUser().length < 2) {
+            document.getElementById('waitingText').style.display = 'block'
+            document.getElementById('loading').style.display = 'flex'
+          }
         }).catch((error) => {
           console.log(error)
         })
@@ -140,33 +150,38 @@ function renderVideos(userId) {
   } else if (zmClient.getAllUser().filter((user) => user.bVideoOn).length > 20) {
     // 5 5
     console.log('column 5')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1420, yCord5, 2).then(() => {})
-    createBubble(userId, -1420, -(800-yCord5))
-    yCord5+=200
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1420, yCord5, 2).then(() => {
+      createBubble(userId, -1420, -(800-yCord5))
+      yCord5+=200
+    })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 15) {
     // 4 5
     console.log('column 4')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1065, yCord4, 2).then(() => {})
-    createBubble(userId, -1065, -(800-yCord4))
-    yCord4+=200
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1065, yCord4, 2).then(() => {
+      createBubble(userId, -1065, -(800-yCord4))
+      yCord4+=200
+    })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 10) {
     // 3 5
     console.log('column 3')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 710, yCord3, 2).then(() => {})
-    createBubble(userId, -710, -(800-yCord3))
-    yCord3+=200
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 710, yCord3, 2).then(() => {
+      createBubble(userId, -710, -(800-yCord3))
+      yCord3+=200
+    })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 5) {
     // 2 5
     console.log('column 2')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 355, yCord2, 2).then(() => {})
-    createBubble(userId, -355, -(800-yCord2))
-    yCord2+=200
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 355, yCord2, 2).then(() => {
+      createBubble(userId, -355, -(800-yCord2))
+      yCord2+=200
+    })
   } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length >= 1) {
     // 1 5
     console.log('column 1')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, xCord, yCord, 2).then(() => {})
-    createBubble(userId, -100, -(800-yCord))
-    yCord+=200
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, xCord, yCord, 2).then(() => {
+      createBubble(userId, -100, -(800-yCord))
+      yCord+=200
+    })
   }
 }
 
@@ -183,7 +198,7 @@ zmClient.on('user-removed', (payload) => {
 
   if(payload.length) {
     console.log(payload);
-    document.getElementById(`bubble-${payload[0].userId}`).remove()
+    // document.getElementById(`bubble-${payload[0].userId}`).remove()
     // document.getElementById(`bubble-${payload[0].userId}`).remove()
     // zmStream.stopRenderVideo(document.getElementById('#zoom-canvas'), payload[0].userId).then(() => {
     //

@@ -106,7 +106,7 @@ body {
   /* border-radius: 50%; */
 }
 
-#self-view-canvas {
+#self-view-canvas, #self-view-video {
   position: absolute;
   top: 0;
   left: 0;
