@@ -32,13 +32,11 @@ body {
 }
 
 #instructions {
+  display: none;
   position: fixed;
-  height: 20px;
   left: 0;
   right: 0;
-  bottom: 0;
-  top: 400px;
-  margin: auto;
+  bottom: 200px;
   text-align: center;
 }
 
@@ -113,7 +111,7 @@ body {
   left: 0;
   right: 0;
   z-index: -10;
-  /* visibility: hidden; */
+  visibility: hidden;
   /* border-radius: 50%; */
 }
 

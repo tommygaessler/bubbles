@@ -69,6 +69,7 @@ function startVideo() {
       console.log('hello')
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
+        document.getElementById('instructions').style.display = 'block'
         // this was hiding on android so needed to show it
         // document.getElementById('self-view-video').style.visibility = 'hidden'
       })
@@ -82,6 +83,7 @@ function startVideo() {
     zmStream.startVideo({ mirrored: true }).then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
+        document.getElementById('instructions').style.display = 'block'
         // this was hiding on android so needed to show it
         // document.getElementById('self-view-video').style.visibility = 'hidden'
       })
@@ -111,6 +113,7 @@ function leave() {
   document.getElementById('self-view-video').style.visibility = 'hidden'
   document.getElementById('leaveButton').style.display = 'none'
   document.getElementById('thanks').style.display = 'flex'
+  document.getElementById('instructions').style.display = 'none'
   zmStream.stopRenderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId).then(() => {
   })
 
