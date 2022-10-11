@@ -62,14 +62,15 @@ function joinSession(signature) {
 
 function startVideo() {
 
-
+  // Android Chrome and Edge self view not working
   // firefox 105 (testing for offscreen canvas) might also need this for android.
   if(!(typeof SharedArrayBuffer === 'function') && (typeof OffscreenCanvas === 'function')) {
     zmStream.startVideo({ videoElement: document.querySelector('#self-view-video') }).then(() => {
       console.log('hello')
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
-        document.getElementById('self-view-video').style.visibility = 'hidden'
+        // this was hiding on android so needed to show it
+        // document.getElementById('self-view-video').style.visibility = 'hidden'
       })
       // document.getElementById('videoButton').style.display = 'none'
       // document.getElementById('self-view-canvas').style.visibility = 'hidden'
@@ -81,7 +82,8 @@ function startVideo() {
     zmStream.startVideo({ mirrored: true }).then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
-        document.getElementById('self-view-video').style.visibility = 'hidden'
+        // this was hiding on android so needed to show it
+        // document.getElementById('self-view-video').style.visibility = 'hidden'
       })
     }).catch((error) => {
       console.log(error)
