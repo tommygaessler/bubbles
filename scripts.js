@@ -69,9 +69,20 @@ function startVideo() {
       console.log('hello')
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
-        document.getElementById('instructions').style.display = 'block'
+        document.getElementById('self-view-wrapper').style.display = 'flex'
         // this was hiding on android so needed to show it
-        // document.getElementById('self-view-video').style.visibility = 'hidden'
+        document.getElementById('self-view-video').style.display = 'none'
+
+        let cameras = zmStream.getCameraList()
+        console.log(cameras)
+        let select = document.getElementById('switch');
+
+        cameras.forEach((camera) => {
+          let opt = document.createElement('option');
+          opt.value = camera.deviceId;
+          opt.innerHTML = camera.label;
+          select.appendChild(opt);
+        })
       })
       // document.getElementById('videoButton').style.display = 'none'
       // document.getElementById('self-view-canvas').style.visibility = 'hidden'
@@ -83,9 +94,21 @@ function startVideo() {
     zmStream.startVideo({ mirrored: true }).then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
-        document.getElementById('instructions').style.display = 'block'
+        document.getElementById('self-view-wrapper').style.display = 'flex'
         // this was hiding on android so needed to show it
-        // document.getElementById('self-view-video').style.visibility = 'hidden'
+        document.getElementById('self-view-video').style.display = 'none'
+
+        let cameras = zmStream.getCameraList()
+        console.log(cameras)
+        console.log('default', zmStream.getActiveCamera())
+        let select = document.getElementById('switch');
+
+        cameras.forEach((camera) => {
+          let opt = document.createElement('option');
+          opt.value = camera.deviceId;
+          opt.innerHTML = camera.label;
+          select.appendChild(opt);
+        })
       })
     }).catch((error) => {
       console.log(error)
@@ -108,12 +131,18 @@ function startVideo() {
   // }
 }
 
+function switchCamera(camera) {
+  console.log(camera.value)
+  zmStream.switchCamera(camera.value)
+}
+
 function leave() {
   document.getElementById('self-view-canvas').style.visibility = 'hidden'
   document.getElementById('self-view-video').style.visibility = 'hidden'
   document.getElementById('leaveButton').style.display = 'none'
   document.getElementById('thanks').style.display = 'flex'
-  document.getElementById('instructions').style.display = 'none'
+  document.getElementById('self-view-wrapper').style.display = 'none'
+  document.getElementById('videoButton').style.display = 'none'
   zmStream.stopRenderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId).then(() => {
   })
 
