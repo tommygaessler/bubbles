@@ -67,23 +67,39 @@ function startVideo() {
   if(!(typeof SharedArrayBuffer === 'function') && (typeof OffscreenCanvas === 'function')) {
     zmStream.startVideo({ videoElement: document.querySelector('#self-view-video') }).then(() => {
       console.log('hello')
-      zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
+      // zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
         document.getElementById('self-view-wrapper').style.display = 'flex'
         // this was hiding on android so needed to show it
-        document.getElementById('self-view-video').style.display = 'none'
+        // document.getElementById('self-view-video').style.display = 'none'
+        document.getElementById('self-view-canvas').style.display = 'none'
 
         let cameras = zmStream.getCameraList()
         console.log(cameras)
         let select = document.getElementById('switch');
 
-        cameras.forEach((camera) => {
-          let opt = document.createElement('option');
-          opt.value = camera.deviceId;
-          opt.innerHTML = camera.label;
-          select.appendChild(opt);
-        })
-      })
+        if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+
+          let opt1 = document.createElement('option');
+          opt1.value = 'user';
+          opt1.innerHTML = 'Front Camera';
+          select.appendChild(opt1);
+
+          let opt2 = document.createElement('option');
+          opt2.value = 'environment';
+          opt2.innerHTML = 'Back Camera';
+          select.appendChild(opt2);
+
+        } else {
+          cameras.forEach((camera) => {
+            let opt = document.createElement('option');
+            opt.value = camera.deviceId;
+            opt.innerHTML = camera.label;
+            select.appendChild(opt);
+          })
+        }
+
+      // })
       // document.getElementById('videoButton').style.display = 'none'
       // document.getElementById('self-view-canvas').style.visibility = 'hidden'
     }).catch((error) => {
