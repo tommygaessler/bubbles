@@ -116,15 +116,28 @@ function startVideo() {
 
         let cameras = zmStream.getCameraList()
         console.log(cameras)
-        console.log('default', zmStream.getActiveCamera())
         let select = document.getElementById('switch');
 
-        cameras.forEach((camera) => {
-          let opt = document.createElement('option');
-          opt.value = camera.deviceId;
-          opt.innerHTML = camera.label;
-          select.appendChild(opt);
-        })
+        if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+
+          let opt1 = document.createElement('option');
+          opt1.value = 'user';
+          opt1.innerHTML = 'Front Camera';
+          select.appendChild(opt1);
+
+          let opt2 = document.createElement('option');
+          opt2.value = 'environment';
+          opt2.innerHTML = 'Back Camera';
+          select.appendChild(opt2);
+
+        } else {
+          cameras.forEach((camera) => {
+            let opt = document.createElement('option');
+            opt.value = camera.deviceId;
+            opt.innerHTML = camera.label;
+            select.appendChild(opt);
+          })
+        }
       })
     }).catch((error) => {
       console.log(error)
