@@ -2,13 +2,16 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>VideoSDK Bubbles</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Video Order</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <meta http-equiv="origin-trial" content="AgzZrbX4jBphRIVHd0mDLyV2c3zKrVzGq/wTUydsSAQqv2njX1U5BCFPiKHSvZsS0LXfsGFrZOqil6A9pu+4pQ0AAABgeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJmZWF0dXJlIjoiVW5yZXN0cmljdGVkU2hhcmVkQXJyYXlCdWZmZXIiLCJleHBpcnkiOjE2NzUyOTU5OTl9" />
     <meta http-equiv="origin-trial" content="AlR2rIheXL2v0+0gDxdqCCT5wmpcXHn74kecrQHMX57Nl0Y7M55bIT12VHExgcMW365bEOOFqlkUrgKMkJK3zAAAAABoeyJvcmlnaW4iOiJodHRwczovL3RvbW15Z2Flc3NsZXIuY29tOjQ0MyIsImZlYXR1cmUiOiJVbnJlc3RyaWN0ZWRTaGFyZWRBcnJheUJ1ZmZlciIsImV4cGlyeSI6MTY3NTI5NTk5OX0=" />
   </head>
-  <body id="body">
+  <body>
+
+    <img src="frame.png" alt="join iframe" id="join-iframe">
 
     <div id="loading">
       <h2 id="loadingText">Connecting to Orb world</h2>
@@ -45,7 +48,15 @@
       </select>
     </div>
 
-    <canvas id="zoom-canvas" width="1777" height="1000"></canvas>
+    <canvas id="zoom-canvas" width="8875" height="200"></canvas>
+
+    <!-- <canvas id="zoom-canvas" width="8875" height="200"></canvas>
+    <button onclick="startVideo()" id="videoButton">Start Video</button>
+    <button onclick="leave()">Leave</button>
+
+    <canvas id="self-view-canvas" width="355" height="200"></canvas>
+    <video id="self-view-video" width="355" height="200"></video> -->
+
 
     <script src="https://source.zoom.us/videosdk/zoom-video-1.5.1.min.js"></script>
     <script type="text/javascript" src="scripts.js"></script>

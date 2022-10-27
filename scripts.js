@@ -3,17 +3,20 @@ const VideoSDK = window.WebVideoSDK.default
 let zmClient = VideoSDK.createClient()
 
 let signatureEndpoint = 'https://videosdk-sample-signature.herokuapp.com'
-let sessionName = 'bubbles2'
+let sessionName = 'apiworld'
 let sessionPasscode = 'test123'
 let userName = 'Participant' + Math.floor(Math.random() * 100)
 let role = 1
 
 zmClient.init('US-en', 'CDN')
 
-start()
+var videoArr = []
+var openSpots = []
 
-// solve for if user closes app
-// solve gallery view order for if user leaves
+// videoArr is collection of userIds that are being rendered
+// openSpots is collection of indexs that a video can be rendered on
+
+start()
 
 function start() {
 
@@ -44,37 +47,27 @@ function joinSession(signature) {
 
       document.getElementById('loadingText').style.display = 'none'
       document.getElementById('waitingText').style.display = 'block'
+      document.getElementById('join-iframe').style.display = 'block'
 
     } else {
-      // document.getElementById('videoButton').disabled = false;
       document.getElementById('videoButton').style.display = 'block'
       document.getElementById('leaveButton').style.display = 'block'
 
       document.getElementById('loading').style.display = 'none'
     }
-
-    console.log(zmClient.getCurrentUserInfo())
-    console.log(zmClient.getSessionInfo())
   }).catch((error) => {
     console.log(error)
   })
 }
 
 function startVideo() {
-
-  // Android Chrome and Edge self view not working
-  // firefox 105 (testing for offscreen canvas) might also need this for android.
   if(!(typeof SharedArrayBuffer === 'function') && (typeof OffscreenCanvas === 'function')) {
     zmStream.startVideo({ videoElement: document.querySelector('#self-view-video') }).then(() => {
-      console.log('hello')
-      // zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
-        document.getElementById('videoButton').style.display = 'none'
-        document.getElementById('self-view-wrapper').style.display = 'flex'
-        // this was hiding on android so needed to show it
-        // document.getElementById('self-view-video').style.display = 'none'
-        document.getElementById('self-view-canvas').style.display = 'none'
+      document.getElementById('videoButton').style.display = 'none'
+      document.getElementById('self-view-wrapper').style.display = 'flex'
+      document.getElementById('self-view-canvas').style.display = 'none'
 
-        let cameras = zmStream.getCameraList()
+      let cameras = zmStream.getCameraList()
         console.log(cameras)
         let select = document.getElementById('switch');
 
@@ -98,10 +91,6 @@ function startVideo() {
             select.appendChild(opt);
           })
         }
-
-      // })
-      // document.getElementById('videoButton').style.display = 'none'
-      // document.getElementById('self-view-canvas').style.visibility = 'hidden'
     }).catch((error) => {
       console.log(error)
     })
@@ -111,7 +100,6 @@ function startVideo() {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
         document.getElementById('self-view-wrapper').style.display = 'flex'
-        // this was hiding on android so needed to show it
         document.getElementById('self-view-video').style.display = 'none'
 
         let cameras = zmStream.getCameraList()
@@ -138,188 +126,95 @@ function startVideo() {
             select.appendChild(opt);
           })
         }
+      }).catch((error) => {
+        console.log(error)
       })
     }).catch((error) => {
       console.log(error)
     })
   }
-
-  // if(!!window.chrome && (typeof SharedArrayBuffer === 'function')) {
-    // zmStream.startVideo({ mirrored: true }).then(() => {
-    //   zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
-    //     document.getElementById('videoButton').style.display = 'none'
-    //     document.getElementById('self-view-video').style.visibility = 'hidden'
-    //   })
-    // }).catch((error) => {
-    //   console.log(error)
-    // })
-  // } else {
-
-  // firefox
-
-  // }
 }
 
 function switchCamera(camera) {
-  console.log(camera.value)
   zmStream.switchCamera(camera.value)
-}
-
-function leave() {
-  document.getElementById('self-view-canvas').style.visibility = 'hidden'
-  document.getElementById('self-view-video').style.visibility = 'hidden'
-  document.getElementById('leaveButton').style.display = 'none'
-  document.getElementById('thanks').style.display = 'flex'
-  document.getElementById('self-view-wrapper').style.display = 'none'
-  document.getElementById('videoButton').style.display = 'none'
-  zmStream.stopRenderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId).then(() => {
-  })
-
-  zmStream.stopVideo().then(() => {
-    zmClient.leave()
-  })
 }
 
 zmClient.on('peer-video-state-change', (payload) => {
 
+  console.log(payload)
   console.log('user video state change', zmClient.getAllUser())
 
-  var interval
+  if(payload.action === 'Start') {
 
-  function ifZmStream() {
-    if(zmStream) {
-      clearInterval(interval)
+    if(zmClient.getCurrentUserInfo().isHost && zmClient.getAllUser().filter((user) => user.bVideoOn).length < 26) {
+      renderVideo(payload.userId)
+      document.getElementById('waitingText').style.display = 'none'
+      document.getElementById('loading').style.display = 'none'
+    }
 
-      if(payload.action === 'Start') {
+  } else if(payload.action === 'Stop') {
 
-        if(zmClient.getCurrentUserInfo().isHost) {
-          renderVideos(payload.userId)
-          document.getElementById('waitingText').style.display = 'none'
-          document.getElementById('loading').style.display = 'none'
+    let userVideoState = zmClient.getAllUser().filter((user) => {
+      return user.userId === payload.userId
+    })[0]
+
+    console.log(userVideoState)
+    console.log('videoArr Off', videoArr)
+
+    if(!userVideoState || userVideoState.bVideoOn) {
+      zmStream.stopRenderVideo(document.querySelector('#zoom-canvas'), payload.userId).then(() => {
+        console.log(payload.userId)
+        console.log(videoArr.indexOf(payload.userId))
+        openSpots.push(videoArr.indexOf(payload.userId))
+        videoArr.splice(videoArr.indexOf(payload.userId), 1)
+
+        // remove bubble
+        removeBubble(payload.userId)
+        if(zmClient.getAllUser().length < 2) {
+          document.getElementById('waitingText').style.display = 'block'
+          document.getElementById('loading').style.display = 'flex'
         }
-
-      } else if(payload.action === 'Stop') {
-        console.log('stopped video, remove user')
-        zmStream.stopRenderVideo(document.querySelector('#zoom-canvas'), payload.userId).then(() => {
-          document.getElementById(`bubble-${payload.userId}`).remove()
-          if(zmClient.getAllUser().length < 2) {
-            document.getElementById('waitingText').style.display = 'block'
-            document.getElementById('loading').style.display = 'flex'
-          }
-        }).catch((error) => {
-          console.log(error)
-        })
-      }
+      }).catch((error) => {
+        console.log(error)
+      })
     }
   }
 
-  interval = setInterval(ifZmStream, 1000)
 })
 
-// grid count
-// x count
-// y count
-// ---
-// x ++355
-// y ++200
+// handle if there are more than 25 in the session with video on and if someone leaves, put the next person in?
 
-var xCord = 0
-var yCord = 0
-var yCord2 = 0
-var yCord3 = 0
-var yCord4 = 0
-var yCord5 = 0
+function renderVideo(user) {
 
-function renderVideos(userId) {
-  if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 25) {
-    // do nothing too many videos
-  } else if (zmClient.getAllUser().filter((user) => user.bVideoOn).length > 20) {
-    // 5 5
-    console.log('column 5')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1420, yCord5, 2).then(() => {
-      // createBubble(userId, -1420, -(800-yCord5))
-      createBubble(userId, -1420, -(800-yCord5))
-      yCord5+=200
+  if(openSpots.length) {
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), user, 355, 200, (355*openSpots[0]), 0, 2).then(() => {
+      // make bubble
+      // makeBubble(user, 200, (355*openSpots[0]))
+      videoArr.splice(openSpots[0], 0, user)
+      // makeBubble(user, -(78+(355*openSpots[0]-355)), 0)
+      makeBubble(user, -(78+(355*openSpots[0])), 0)
+      openSpots.shift()
+    }).catch((error) => {
+      console.log(error)
     })
-  } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 15) {
-    // 4 5
-    console.log('column 4')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 1065, yCord4, 2).then(() => {
-      // createBubble(userId, -1065, -(800-yCord4))
-      createBubble(userId, -1498, -(800-yCord4))
-      yCord4+=200
-    })
-  } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 10) {
-    // 3 5
-    console.log('column 3')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 710, yCord3, 2).then(() => {
-      // createBubble(userId, -710, -(800-yCord3))
-      createBubble(userId, -788, -(800-yCord3))
-      yCord3+=200
-    })
-  } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length > 5) {
-    // 2 5
-    console.log('column 2')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, 355, yCord2, 2).then(() => {
-      // createBubble(userId, -355, -(800-yCord2))
-      createBubble(userId, -433, -(800-yCord2))
-      yCord2+=200
-    })
-  } else if(zmClient.getAllUser().filter((user) => user.bVideoOn).length >= 1) {
-    // 1 5
-    console.log('column 1')
-    zmStream.renderVideo(document.querySelector('#zoom-canvas'), userId, 355, 200, xCord, yCord, 2).then(() => {
-      // createBubble(userId, -100, -(800-yCord))
-      createBubble(userId, -78, -(800-yCord))
-      yCord+=200
+  } else {
+    videoArr.push(user)
+    zmStream.renderVideo(document.querySelector('#zoom-canvas'), user, 355, 200, (355*videoArr.length-355), 0, 2).then(() => {
+      // make bubble
+      makeBubble(user, -(78+(355*videoArr.length-355)), 0)
+    }).catch((error) => {
+      console.log(error)
     })
   }
+  console.log('Video Array', videoArr)
+  console.log('Open Spots', openSpots)
+
 }
 
-zmClient.on('user-added', (payload) => {
+var bubblesObject = {}
 
-  // if(zmClient.getAllUser().length < 3) {
-  //   if(payload[0].userId !== zmClient.getCurrentUserInfo().userId) {
-  //     document.querySelector('#participant-name').textContent = payload[0].displayName
-  //   }
-  // }
-})
+function makeBubble(userId, xCord, yCord) {
 
-zmClient.on('user-removed', (payload) => {
-
-  if(payload.length) {
-    console.log(payload);
-    // document.getElementById(`bubble-${payload[0].userId}`).remove()
-    // document.getElementById(`bubble-${payload[0].userId}`).remove()
-    // zmStream.stopRenderVideo(document.getElementById('#zoom-canvas'), payload[0].userId).then(() => {
-    //
-    // }).catch((error) => {
-    //   console.log(error)
-    // })
-    if(zmClient.getAllUser().length < 2) {
-      document.getElementById('waitingText').style.display = 'block'
-      document.getElementById('loading').style.display = 'flex'
-    }
-  }
-})
-
-zmClient.off('user-added', (payload) => {
-
-  // if(zmClient.getAllUser().length < 3) {
-  //   if(payload[0].userId !== zmClient.getCurrentUserInfo().userId) {
-  //     document.querySelector('#participant-name').textContent = payload[0].displayName
-  //   }
-  // }
-})
-
-zmClient.off('user-removed', (payload) => {
-  // zmStream.stopRenderVideo(document.querySelector('#zoom-canvas'), payload[0].userId).then(() => {
-  //
-  //
-  // })
-})
-
-function createBubble(userId, xCord, yCord) {
   var bubble = document.createElement('canvas')
   bubble.setAttribute('id', `bubble-${userId}`)
   bubble.setAttribute('class', 'circle')
@@ -329,19 +224,14 @@ function createBubble(userId, xCord, yCord) {
   var ctx = document.getElementById(`bubble-${userId}`).getContext('2d');
   var video = document.getElementById('zoom-canvas');
 
-  // setTimeout(() => {
-    // function crop() {
-      console.log('cropped');
-      (function loop() {
-        // if (true) {
-          // the cords will be dynamic. This whole function too, if someone leaves, break the loop
-          ctx.drawImage(video, xCord, yCord);
-          setTimeout(loop, 1000 / 30); // drawing at 30fps
-        // }
-      })();
-      // ctx.drawImage(video, 0, 0);
-    // }
-  // }, 3000)
+  (function loop() {
+    if (videoArr.indexOf(userId) !== -1) {
+      ctx.drawImage(video, xCord, yCord);
+      setTimeout(loop, 1000 / 30);
+    } else {
+      console.log('stopped copying')
+    }
+  })();
 
   let x = 0,
     y = 0,
@@ -383,9 +273,33 @@ function createBubble(userId, xCord, yCord) {
     y += dirY * speed;
     dvd.style.left = x + "px";
     dvd.style.top = y + "px";
-    window.requestAnimationFrame(animate);
+    bubblesObject[userId].inner = window.requestAnimationFrame(animate)
   }
 
-  window.requestAnimationFrame(animate);
-
+  bubblesObject[userId] = {
+    outer: window.requestAnimationFrame(animate)
+  }
 }
+
+function removeBubble(userId) {
+  document.getElementById(`bubble-${userId}`).remove()
+  cancelAnimationFrame(bubblesObject[userId].inner)
+  cancelAnimationFrame(bubblesObject[userId].outer)
+  delete bubblesObject[userId]
+}
+
+function leave() {
+
+  document.getElementById('self-view-canvas').style.visibility = 'hidden'
+  document.getElementById('self-view-video').style.visibility = 'hidden'
+  document.getElementById('leaveButton').style.display = 'none'
+  document.getElementById('thanks').style.display = 'flex'
+  document.getElementById('self-view-wrapper').style.display = 'none'
+  document.getElementById('videoButton').style.display = 'none'
+
+  zmClient.leave()
+}
+
+zmClient.on('user-removed', (payload) => {
+  console.log('user left', payload)
+})
