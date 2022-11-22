@@ -154,12 +154,12 @@ function switchCamera(camera) {
 
   if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && camera.value === 'environment') {
     // transform: scale(-1, 1);
-    document.getElementById('self-view-canvas').style.transform = scale(-1, 1)
-    document.getElementById('self-view-video').style.transform = scale(-1, 1)
+    document.getElementById('self-view-canvas').style.transform = "scale(-1, 1)"
+    document.getElementById('self-view-video').style.transform = "scale(-1, 1)"
   } else {
     // transform: scale(1, -1);
-    document.getElementById('self-view-canvas').style.transform = scale(1, -1)
-    document.getElementById('self-view-video').style.transform = scale(1, -1)
+    document.getElementById('self-view-canvas').style.transform = "scale(1, -1)"
+    document.getElementById('self-view-video').style.transform = "scale(1, -1)"
   }
 
   zmStream.switchCamera(camera.value)
