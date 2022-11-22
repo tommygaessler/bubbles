@@ -61,11 +61,26 @@ function joinSession(signature) {
 }
 
 function startVideo() {
-  if(!(typeof SharedArrayBuffer === 'function') && (typeof OffscreenCanvas === 'function')) {
+  if((!zmStream.isSupportMultipleVideos() && (typeof OffscreenCanvas === 'function')) || /android/i.test(navigator.userAgent)) {
     zmStream.startVideo({ videoElement: document.querySelector('#self-view-video') }).then(() => {
-      document.getElementById('videoButton').style.display = 'none'
-      document.getElementById('self-view-wrapper').style.display = 'flex'
-      document.getElementById('self-view-canvas').style.display = 'none'
+
+      if(!(typeof MediaStreamTrackProcessor === 'function')) {
+        stream.renderVideo(document.querySelector('#self-view-canvas'), client.getCurrentUserInfo().userId, 1920, 1080, 0, 0, 2).then(() => {
+          // show HTML Canvas Element in DOM
+          // document.getElementById('self-view-canvas').style.display = 'block'
+          document.getElementById('videoButton').style.display = 'none'
+          document.getElementById('self-view-wrapper').style.display = 'flex'
+          document.getElementById('self-view-video').style.display = 'none'
+        }).catch((error) => {
+          console.log(error)
+        })
+      } else {
+        document.getElementById('videoButton').style.display = 'none'
+        document.getElementById('self-view-wrapper').style.display = 'flex'
+        document.getElementById('self-view-canvas').style.display = 'none'
+      }
+
+      
 
       let cameras = zmStream.getCameraList()
         console.log(cameras)
@@ -96,7 +111,7 @@ function startVideo() {
     })
   } else {
     // desktop edge, chrome, safari
-    zmStream.startVideo({ mirrored: true }).then(() => {
+    zmStream.startVideo().then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
         document.getElementById('self-view-wrapper').style.display = 'flex'
@@ -136,6 +151,17 @@ function startVideo() {
 }
 
 function switchCamera(camera) {
+
+  if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && camera.value === 'environment') {
+    // transform: scale(-1, 1);
+    document.getElementById('self-view-canvas').style.transform = scale(-1, 1)
+    document.getElementById('self-view-video').style.transform = scale(-1, 1)
+  } else {
+    // transform: scale(1, -1);
+    document.getElementById('self-view-canvas').style.transform = scale(1, -1)
+    document.getElementById('self-view-video').style.transform = scale(1, -1)
+  }
+
   zmStream.switchCamera(camera.value)
 }
 

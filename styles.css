@@ -104,10 +104,6 @@ html, body {
   display: none;
 }
 
-#self-view-video {
-  transform: scale(-1, 1);
-}
-
 #self-view-wrapper {
   display: flex;
   justify-content: center;
@@ -146,6 +142,7 @@ html, body {
 
 #self-view-canvas, #self-view-video {
   border-radius: 10px;
+  transform: scale(-1, 1);
   width: 100%;
 }
 
