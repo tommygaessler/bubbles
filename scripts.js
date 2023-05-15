@@ -2,8 +2,8 @@ const VideoSDK = window.WebVideoSDK.default
 
 let zmClient = VideoSDK.createClient()
 
-let signatureEndpoint = 'https://videosdk-sample-signature.herokuapp.com'
-let sessionName = 'apiworld'
+let signatureEndpoint = 'https://or116ttpz8.execute-api.us-west-1.amazonaws.com/default/videosdk'
+let sessionName = 'orbworld'
 let sessionPasscode = 'test123'
 let userName = 'Participant' + Math.floor(Math.random() * 100)
 let role = 1
@@ -22,9 +22,6 @@ function start() {
 
   fetch(signatureEndpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
     body: JSON.stringify({
       sessionName: sessionName,
       role: role
@@ -61,71 +58,23 @@ function joinSession(signature) {
 }
 
 function startVideo() {
-  if(!(typeof SharedArrayBuffer === 'function') && (typeof OffscreenCanvas === 'function')) {
+
+  if(zmStream.isRenderSelfViewWithVideoElement()) {
     zmStream.startVideo({ videoElement: document.querySelector('#self-view-video') }).then(() => {
       document.getElementById('videoButton').style.display = 'none'
       document.getElementById('self-view-wrapper').style.display = 'flex'
       document.getElementById('self-view-canvas').style.display = 'none'
-
-      let cameras = zmStream.getCameraList()
-        console.log(cameras)
-        let select = document.getElementById('switch');
-
-        if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-
-          let opt1 = document.createElement('option');
-          opt1.value = 'user';
-          opt1.innerHTML = 'Front Camera';
-          select.appendChild(opt1);
-
-          let opt2 = document.createElement('option');
-          opt2.value = 'environment';
-          opt2.innerHTML = 'Back Camera';
-          select.appendChild(opt2);
-
-        } else {
-          cameras.forEach((camera) => {
-            let opt = document.createElement('option');
-            opt.value = camera.deviceId;
-            opt.innerHTML = camera.label;
-            select.appendChild(opt);
-          })
-        }
+      cameraList()
     }).catch((error) => {
       console.log(error)
     })
   } else {
-    // desktop edge, chrome, safari
     zmStream.startVideo({ mirrored: true }).then(() => {
       zmStream.renderVideo(document.querySelector('#self-view-canvas'), zmClient.getCurrentUserInfo().userId, 355, 200, 0, 0, 2).then(() => {
         document.getElementById('videoButton').style.display = 'none'
         document.getElementById('self-view-wrapper').style.display = 'flex'
         document.getElementById('self-view-video').style.display = 'none'
-
-        let cameras = zmStream.getCameraList()
-        console.log(cameras)
-        let select = document.getElementById('switch');
-
-        if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-
-          let opt1 = document.createElement('option');
-          opt1.value = 'user';
-          opt1.innerHTML = 'Front Camera';
-          select.appendChild(opt1);
-
-          let opt2 = document.createElement('option');
-          opt2.value = 'environment';
-          opt2.innerHTML = 'Back Camera';
-          select.appendChild(opt2);
-
-        } else {
-          cameras.forEach((camera) => {
-            let opt = document.createElement('option');
-            opt.value = camera.deviceId;
-            opt.innerHTML = camera.label;
-            select.appendChild(opt);
-          })
-        }
+        cameraList()
       }).catch((error) => {
         console.log(error)
       })
@@ -137,6 +86,33 @@ function startVideo() {
 
 function switchCamera(camera) {
   zmStream.switchCamera(camera.value)
+}
+
+function cameraList() {
+  let cameras = zmStream.getCameraList()
+  console.log(cameras)
+  let select = document.getElementById('switch');
+
+  if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+
+    let opt1 = document.createElement('option');
+    opt1.value = 'user';
+    opt1.innerHTML = 'Front Camera';
+    select.appendChild(opt1);
+
+    let opt2 = document.createElement('option');
+    opt2.value = 'environment';
+    opt2.innerHTML = 'Back Camera';
+    select.appendChild(opt2);
+
+  } else {
+    cameras.forEach((camera) => {
+      let opt = document.createElement('option');
+      opt.value = camera.deviceId;
+      opt.innerHTML = camera.label;
+      select.appendChild(opt);
+    })
+  }
 }
 
 zmClient.on('peer-video-state-change', (payload) => {
